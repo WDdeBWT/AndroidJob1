@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">AndroidJob1</string>
+    <string name="uname_hint">UserName</string>
+    <string name="pwd_hint">PassWord</string>
+    <string name="login">Login</string>
+    <string name="quit">Quit</string>
+</resources>
