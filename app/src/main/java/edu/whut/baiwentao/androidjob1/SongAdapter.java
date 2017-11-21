@@ -11,11 +11,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-/**
- * Created by 珀石 on 2017/9/26.
- * 自定义的适配器，这个适配器继承自ArrayAdapter，并将泛型指定为Song类
- */
-
 public class SongAdapter extends ArrayAdapter<Song> {
     private int resourceId;
 
@@ -37,9 +32,9 @@ public class SongAdapter extends ArrayAdapter<Song> {
         if (convertView == null) {
             view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
             viewHolder = new ViewHolder();
-            viewHolder.coverImg = (ImageView) view.findViewById (R.id.img_cover);
-            viewHolder.songNameTxt = (TextView) view.findViewById (R.id.txt_song_name);
-            viewHolder.singerTxt = (TextView) view.findViewById (R.id.txt_singer);
+            viewHolder.coverImg = (ImageView) view.findViewById(R.id.img_cover);
+            viewHolder.songNameTxt = (TextView) view.findViewById(R.id.txt_song_name);
+            viewHolder.singerTxt = (TextView) view.findViewById(R.id.txt_singer);
             view.setTag(viewHolder);
         } else {
             view = convertView;
@@ -48,15 +43,15 @@ public class SongAdapter extends ArrayAdapter<Song> {
         viewHolder.coverImg.setImageResource(song.getCover());
         viewHolder.songNameTxt.setText(song.getSongName());
         viewHolder.singerTxt.setText(song.getSinger());
+        viewHolder.songPath=song.getSongPath();
         return view;
     }
 
     class ViewHolder {
-        /**需参考教学资源中课件例子中的“ LIstView的使用”中的FruitAdapter，
-         * 定义合适的ViewHolder**/
         ImageView coverImg;
         TextView songNameTxt;
         TextView singerTxt;
+        String songPath;
     }
 
 }

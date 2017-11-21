@@ -39,6 +39,13 @@
         android:layout_height="wrap_content"
         android:hint="@string/pwd_hint"/>
 
+    <CheckBox
+        android:id="@+id/chk_savename"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="记住用户名"
+        android:checked="true"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
