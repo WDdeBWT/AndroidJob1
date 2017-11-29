@@ -48,11 +48,19 @@ public class ListActivity extends AppCompatActivity {
 
     // 定义一个歌曲数组，作为ListView的数据源
     private List<Song> songArray = new ArrayList<Song>();
+    public static ArrayList<Song> playList = new ArrayList<Song>();
+    TextView songPathTxt;
+//    private ArrayList<String> playNameList = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+
+//        for (int i = 0 ; i < playList.size(); i++)
+//        {
+//            playNameList.add(playList.get(i).getSongName());
+//        }
 
         intentFilter = new IntentFilter();
         intentFilter.addAction("android.intent.action.HEADSET_PLUG");
@@ -61,6 +69,7 @@ public class ListActivity extends AppCompatActivity {
 
 
         TextView welcomeTxt = (TextView) findViewById(R.id.txt_welcome);
+        songPathTxt = (TextView) findViewById(R.id.txt_song_path);
         Button backBtn = (Button) findViewById(R.id.btn_back);
         String user_name = this.getIntent().getStringExtra("uname");
         welcomeTxt.setText("欢迎：" + user_name + "!");
@@ -71,6 +80,17 @@ public class ListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        /**进入play_list的方法**/
+        Button playListBtn=(Button)findViewById(R.id.btn_playlist);
+        playListBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ListActivity.this, PlayListActivity.class);
+                startActivity(intent);
+            }
+        });
+
         // 调用initSong()之前需先动态获取权限Manifest.permission.READ_EXTERNAL_STORAGE
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
@@ -120,15 +140,19 @@ public class ListActivity extends AppCompatActivity {
         songList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Song song = songArray.get(position);
-                songURL = song.getSongPath();
-                //动态获取存储访问权限
-                if (ContextCompat.checkSelfPermission(ListActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(ListActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
-                } else {
-                    mediaPlayer.reset();
-                    initMediaPlayer(); // 初始化MediaPlayer
-                    playMusic();
+                playList.add(songArray.get(position));
+                if (!mediaPlayer.isPlaying())
+                {
+                    Song song = playList.get(0);
+                    songURL = song.getSongPath();
+                    //动态获取存储访问权限
+                    if (ContextCompat.checkSelfPermission(ListActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(ListActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
+                    } else {
+                        mediaPlayer.reset();
+                        initMediaPlayer(); // 初始化MediaPlayer
+                        playMusic();
+                    }
                 }
             }
         });
@@ -137,9 +161,10 @@ public class ListActivity extends AppCompatActivity {
     //内部方法，用于初始化播放器
     private void initMediaPlayer() {
         try {
-            if (songURL == null) songURL = songArray.get(0).getSongPath();
+            if (songURL == null) songURL = playList.get(0).getSongPath();
             mediaPlayer.setDataSource(songURL); // 指定音频文件的路径
             mediaPlayer.prepare(); // 让MediaPlayer进入到准备状态
+            songPathTxt.setText("当前歌曲：" + songURL);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -163,6 +188,35 @@ public class ListActivity extends AppCompatActivity {
                 }
             };
             mTimer.schedule(mTimerTask, 0, 10);
+            //setOnCompletionListener 当前多媒体对象播放完成时发生的事件
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                public void onCompletion(MediaPlayer arg0) {
+                    next();//如果当前歌曲播放完毕,自动播放下一首.
+                }
+            });
+        }
+    }
+
+    public void next() {
+
+        playList.remove(0);
+        if (playList.get(0) != null)
+        {
+            Song song = playList.get(0);
+            songURL = song.getSongPath();
+            //动态获取存储访问权限
+            if (ContextCompat.checkSelfPermission(ListActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(ListActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
+            } else {
+                mediaPlayer.reset();
+                initMediaPlayer(); // 初始化MediaPlayer
+                playMusic();
+                Toast.makeText(getApplicationContext(), "下一首", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(), "播放列表为空，播放结束", Toast.LENGTH_SHORT).show();
         }
     }
 
